@@ -50,7 +50,6 @@ public class CompanyBasic{
 
 	@Length(max=100,message="行政区划代码名称长度最大不超过100个字符")
 	@NotBlank(message="行政区划代码不能为空")
-	@Column(name = "DISTRICT_NAME")
     private String districtName;
 	
 	/**
