@@ -1,9 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Hello, World</title>
+    <style type="text/css">
+        html {
+            height: 100%
+        }
+
+        body {
+            height: 100%;
+            margin: 0px;
+            padding: 0px
+        }
+
+        #container {
+            height: 100%
+        }
+    </style>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&amp;ak=sehiF02wpP7HEImrFVE08gP3cHsYnkHC">
+    </script>
 </head>
+
 <body>
-<p>dfgsdf11111gsdfgswertwet2314234dfgsdfg</p>
+<div id="container"></div>
+<script type="text/javascript">
+    var map = new BMap.Map("container");
+    //    百度BD09坐标
+    var point = new BMap.Point(116.404, 39.915);
+    map.enableScrollWheelZoom();
+    map.centerAndZoom(point, 15);
+    map.addControl(new BMap.NavigationControl());
+    map.addControl(new BMap.ScaleControl());
+    map.addControl(new BMap.OverviewMapControl());
+    map.addControl(new BMap.MapTypeControl());
+    map.setCurrentCity("北京");
+    var point = new BMap.Point(116.404, 39.915);
+    var marker = new BMap.Marker(point);        // 创建标注
+    map.addOverlay(marker);
+    marker.addEventListener("click", function () {
+        alert("您点击了标注");
+    });
+    marker.enableDragging();
+    marker.addEventListener("dragend", function (e) {
+//        alert("当前位置：" + e.point.lng + ", " + e.point.lat);
+        var infoWindow = new BMap.InfoWindow("World", opts);  // 创建信息窗口对象
+        map.openInfoWindow(infoWindow, map.getCenter());
+    });
+    var opts = {
+        width: 250,     // 信息窗口宽度
+        height: 100,     // 信息窗口高度
+        title: "Hello"  // 信息窗口标题
+    };
+    var polyline = new BMap.Polyline([
+            new BMap.Point(116.399, 39.910),
+            new BMap.Point(116.405, 39.920),
+            new BMap.Point(116.415, 39.930),
+        ],
+        {strokeColor: "blue", strokeWeight: 6, strokeOpacity: 0.5}
+    );
+    map.addOverlay(polyline);
+
+    //    window.setTimeout(function(){
+    //        map.panTo(new BMap.Point(116.409, 39.918));
+    //    }, 2000);
+
+</script>
 </body>
 </html>
