@@ -18,52 +18,126 @@
             height: 100%
         }
     </style>
-    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&amp;ak=sehiF02wpP7HEImrFVE08gP3cHsYnkHC">
-    </script>
+    <script type="text/javascript"
+            src="http://api.map.baidu.com/api?v=2.0&amp;ak=sehiF02wpP7HEImrFVE08gP3cHsYnkHC"></script>
+    <script type="text/javascript" src="../static/js/Map.js"></script>
+    <script type="text/javascript" src="../static/js/LuShu.js"></script>
+    <script type="text/javascript" src="../static/js/MarkerClusterer.js"></script>
+    <script type="text/javascript" src="../static/js/RichMarker.js"></script>
+    <script type="text/javascript" src="../static/js/TextIconOverlay.js"></script>
+    <script type="text/javascript" src="../static/js/Route.js"></script>
+    <script type="text/javascript" src="../static/js/lib/util.js"></script>
+    <script type="text/javascript" src="../static/js/event.js"></script>
 </head>
 
 <body>
 <div id="container"></div>
-<script type="text/javascript">
-    var map = new BMap.Map("container");
-    //    百度BD09坐标
-    var point = new BMap.Point(116.404, 39.915);
-    map.enableScrollWheelZoom();
-    map.centerAndZoom(point, 15);
-    map.addControl(new BMap.NavigationControl());
-    map.addControl(new BMap.ScaleControl());
-    map.addControl(new BMap.OverviewMapControl());
-    map.addControl(new BMap.MapTypeControl());
-    map.setCurrentCity("北京");
-    var point = new BMap.Point(116.404, 39.915);
-    var marker = new BMap.Marker(point);        // 创建标注
-    map.addOverlay(marker);
-    marker.addEventListener("click", function () {
-        alert("您点击了标注");
-    });
-    marker.enableDragging();
-    marker.addEventListener("dragend", function (e) {
-//        alert("当前位置：" + e.point.lng + ", " + e.point.lat);
-        var infoWindow = new BMap.InfoWindow("World", opts);  // 创建信息窗口对象
-        map.openInfoWindow(infoWindow, map.getCenter());
-    });
-    var opts = {
-        width: 250,     // 信息窗口宽度
-        height: 100,     // 信息窗口高度
-        title: "Hello"  // 信息窗口标题
-    };
-    var polyline = new BMap.Polyline([
-            new BMap.Point(116.399, 39.910),
-            new BMap.Point(116.405, 39.920),
-            new BMap.Point(116.415, 39.930),
-        ],
-        {strokeColor: "blue", strokeWeight: 6, strokeOpacity: 0.5}
-    );
-    map.addOverlay(polyline);
+<div id="results"></div>
+<button id="run">run</button>
+<!--<button id="run1" >run1</button>-->
 
-    //    window.setTimeout(function(){
-    //        map.panTo(new BMap.Point(116.409, 39.918));
-    //    }, 2000);
+<script type="text/javascript">
+
+    var map = new Map("container");
+
+    var shockPoint = new BMap.Point(116.404, 39.915);
+    console.log(shockPoint);
+
+    map.centerAndZoom(shockPoint, 12);
+    map.enableScrollWheelZoom();
+
+    keydownEvent(map);
+
+    var max = 10;
+    let markers = getNewMarkers(max, shockPoint);
+    var markerClusterer = new BMapLib.MarkerClusterer(map, {markers: markers});
+    //
+    //
+    for (i = 0; i < markers.length; i++) {
+        map.addOverlay(markers[i])
+    }
+
+    window.lushus = [];
+
+
+    new Route(map, shockPoint).setStarts(markers);
+
+    //    new Route(map,point3).setStarts(["王府井","百度大厦"]);
+
+    //绑定事件
+    $("run").onclick = function () {
+        for (var i = 0; i < lushus.length; i++) {
+            var ls = lushus[i];
+            ls.start();
+        }
+    };
+
+    //标注移动
+    map.addRichMark(shockPoint);
+
+
+    //    marker.enableDragging();
+    //    marker.addEventListener("click", function (e) {
+    //        //        alert("当前位置：" + e.point.lng + ", " + e.point.lat);
+    //        var infoWindow = new BMap.InfoWindow("World", opts);  // 创建信息窗口对象
+    //        map.openInfoWindow(infoWindow, map.getCenter());
+    //    });
+    //    var opts = {
+    //        width: 250,     // 信息窗口宽度
+    //        height: 100,     // 信息窗口高度
+    //        title: "Hello"  // 信息窗口标题
+    //    };
+
+    //折线
+    //    var polyline = new BMap.Polyline([
+    //            new BMap.Point(116.399, 39.910),
+    //            new BMap.Point(116.405, 39.920),
+    //            new BMap.Point(116.390, 39.930),
+    //            new BMap.Point(116.410, 39.920),
+    //            new BMap.Point(116.41133, 39.929277),
+    //        ],
+    //        {strokeColor: "blue", strokeWeight: 6, strokeOpacity: 0.5}
+    //    );
+    //    map.addOverlay(polyline);
+
+    //    需要对应lib包
+    //    var myPushpin = new BMap.PushpinTool(map);         // 创建标注工具实例
+    //    myPushpin.addEventListener("markend", function (e) {  // 监听事件，提示标注点坐标信息
+    //        alert("您标注的位置：" +
+    //            e.marker.getPoint().lng + ", " +
+    //            e.marker.getPoint().lat);
+    //    });
+    //    myPushpin.open();
+
+    /*var local = new BMap.LocalSearch(map,
+     {renderOptions: {map: map,panel:"results"},});
+     local.search("中关村");*/
+
+    //    事件
+    /*map.addEventListener("dragend", function(){
+     var center = map.getCenter();
+     alert("地图中心点变更为：" + center.lng + ", " + center.lat);
+     });*/
+    /*function showInfo(e){
+     alert(e.point.lng + ", " + e.point.lat);
+     map.removeEventListener("click", showInfo);
+     }
+     map.addEventListener("click", showInfo);*/
+    map.addEventListener("zoomend", function () {
+        console.log("地图缩放至：" + this.getZoom() + "级");
+    });
+
+    //    添加自定义图层
+    /*var tilelayer = new BMap.TileLayer();
+     tilelayer.getTilesUrl=function(){             // 设置图块路径
+     return "layer.gif";
+     };
+     map.addTileLayer(tilelayer);*/
+
+    //点击移动
+    /*window.setTimeout(function(){
+     map.panTo(new BMap.Point(116.409, 39.918));
+     }, 2000);*/
 
 </script>
 </body>
