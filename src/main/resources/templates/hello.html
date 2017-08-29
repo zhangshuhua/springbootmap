@@ -41,103 +41,186 @@
     var map = new Map("container");
 
     var shockPoint = new BMap.Point(116.404, 39.915);
-    console.log(shockPoint);
+
+    var point1 = new BMap.Point(116.412624, 39.890646);
+    var point2 = new BMap.Point(116.443094, 39.935362);
+    var point3 = new BMap.Point(116.419931, 39.934604);
+    var marker1 = new BMap.Marker(point1);
+    var marker2 = new BMap.Marker(point2);
 
     map.centerAndZoom(shockPoint, 12);
     map.enableScrollWheelZoom();
 
     keydownEvent(map);
 
-    var max = 10;
-    let markers = getNewMarkers(max, shockPoint);
-    var markerClusterer = new BMapLib.MarkerClusterer(map, {markers: markers});
-    //
-    //
-    for (i = 0; i < markers.length; i++) {
-        map.addOverlay(markers[i])
-    }
+    //    var max = 5;
+    //    let markers = getNewMarkers(max, shockPoint);
 
+
+    //    var markerClusterer = new BMapLib.MarkerClusterer(map, {markers: markers});
+
+    map.addOverlay(marker1);
+    map.addOverlay(marker2);
+    //
     window.lushus = [];
+    ////
+    //    var route = new Route(map, shockPoint)
+    //
+    //    route.addLandPois(point1);
+    ////    route.setStarts(markers);
+    //    route.setStart(point2);
+    //
+    //    //    new Route(map,point3).setStarts(["王府井","百度大厦"]);
+    //
+    //    //绑定事件
+
+    var lushuOpts = {
+        defaultContent: "一方有难，八方支援",
+        // autoView: false,//是否开启自动视野调整，如果开启那么路书在运动过程中会根据视野自动调整,会出现抖动
+        icon: new BMap.Icon('../static/img/car.png', new BMap.Size(52, 26), {anchor: new BMap.Size(27, 13)}),
+        speed: 1000,
+        enableRotation: true,//是否设置marker随着道路的走向进行旋转
+        landmarkPois: [
+            {lng: 116.419931, lat: 39.934604, html: '加油中...<div></div>', pauseTime: 2}
+        ],
+        totalDuration: 2000,
+        totalDistance: 10000,
+        endContent: "到达灾区"
+    };
+
+    var duration, distance;
+
+    var driving = new BMap.DrivingRoute(map, {
+        onSearchComplete: function (res) {
+            if (driving.getStatus() == BMAP_STATUS_SUCCESS) {
+                //途径一个点的话，有两个route
+                var plan = res.getPlan(0);
+                duration = plan.getDuration(false);
+                distance = plan.getDistance(false);
+                var arrPois0 = res.getPlan(0).getRoute(0).getPath();
+//                arrPois0.pop();
+                arrPois0[arrPois0.length - 1].lng = 116.419931;
+                arrPois0[arrPois0.length - 1].lat = 39.934604;
+                var arrPois1 = res.getPlan(0).getRoute(1).getPath();
+
+                var plans = res.getPlan(0).getRoute(0).getPath;
+
+//                console.info('arrPois0 ',arrPois0)
+//                console.info('arrPois1 ',arrPois1)
+
+                //结合两个数组一起显示
+                var arrPois = arrPois0.concat(arrPois1);
+                console.info('arrPois ', arrPois);
+
+//                console.info(arrPois);
+                map.addOverlay(new BMap.Polyline(arrPois, {strokeColor: '#111'}));
+//                map.addOverlay(new BMap.Polyline(arrPois1, {strokeColor: '#111'}));
+                // map.setViewport(arrPois);
+
+                var lushu1 = new BMapLib.LuShu(map, arrPois, lushuOpts);
+//                var lushu2 = new BMapLib.LuShu(map, arrPois1, lushuOpts);
+                window.lushus.push(lushu1);
+//                window.lushus.push(lushu2);
+            }
+
+        },
+        renderOptions: {
+            map: map,
+            autoViewport: true
+        }
+    });
+    //    driving.search(point1, point2);//waypoints表示途经点
+    driving.search(point1, point2, {waypoints: [point3]});//waypoints表示途经点
+
+    var start;
+
+    //    setInterval(function () {
+    //
+    ////        alert(1);
+    //        if(start){
+    //            //行走相对下标
+    //            var p = lushus[0].getIndexProportion();
+    //
+    //
+    //
+    //            var currentDuration = ((duration*(1-p))/60).toFixed(2);
+    //            var currentDistance = ((distance*(1-p))/1000).toFixed(0);
+    //
+    //            console.log("剩余"+currentDistance+"分钟")
+    //            console.log("剩余"+currentDuration+"公里")
+    //
+    ////            lushus[0]._overlay.setHtml(currentDistance);
+    //
+    //        }
+    //    },500);
 
 
-    new Route(map, shockPoint).setStarts(markers);
+    //
 
-    //    new Route(map,point3).setStarts(["王府井","百度大厦"]);
 
-    //绑定事件
     $("run").onclick = function () {
+        start = true;
+
         for (var i = 0; i < lushus.length; i++) {
             var ls = lushus[i];
             ls.start();
         }
     };
-
+    //
     //标注移动
     map.addRichMark(shockPoint);
 
-
-    //    marker.enableDragging();
-    //    marker.addEventListener("click", function (e) {
-    //        //        alert("当前位置：" + e.point.lng + ", " + e.point.lat);
-    //        var infoWindow = new BMap.InfoWindow("World", opts);  // 创建信息窗口对象
-    //        map.openInfoWindow(infoWindow, map.getCenter());
-    //    });
-    //    var opts = {
-    //        width: 250,     // 信息窗口宽度
-    //        height: 100,     // 信息窗口高度
-    //        title: "Hello"  // 信息窗口标题
-    //    };
-
-    //折线
-    //    var polyline = new BMap.Polyline([
-    //            new BMap.Point(116.399, 39.910),
-    //            new BMap.Point(116.405, 39.920),
-    //            new BMap.Point(116.390, 39.930),
-    //            new BMap.Point(116.410, 39.920),
-    //            new BMap.Point(116.41133, 39.929277),
-    //        ],
-    //        {strokeColor: "blue", strokeWeight: 6, strokeOpacity: 0.5}
-    //    );
-    //    map.addOverlay(polyline);
-
-    //    需要对应lib包
-    //    var myPushpin = new BMap.PushpinTool(map);         // 创建标注工具实例
-    //    myPushpin.addEventListener("markend", function (e) {  // 监听事件，提示标注点坐标信息
-    //        alert("您标注的位置：" +
-    //            e.marker.getPoint().lng + ", " +
-    //            e.marker.getPoint().lat);
-    //    });
-    //    myPushpin.open();
-
-    /*var local = new BMap.LocalSearch(map,
-     {renderOptions: {map: map,panel:"results"},});
-     local.search("中关村");*/
-
-    //    事件
-    /*map.addEventListener("dragend", function(){
-     var center = map.getCenter();
-     alert("地图中心点变更为：" + center.lng + ", " + center.lat);
-     });*/
-    /*function showInfo(e){
+    function showInfo(e) {
      alert(e.point.lng + ", " + e.point.lat);
-     map.removeEventListener("click", showInfo);
      }
-     map.addEventListener("click", showInfo);*/
+    map.addEventListener("click", showInfo);
+
     map.addEventListener("zoomend", function () {
         console.log("地图缩放至：" + this.getZoom() + "级");
     });
 
-    //    添加自定义图层
-    /*var tilelayer = new BMap.TileLayer();
-     tilelayer.getTilesUrl=function(){             // 设置图块路径
-     return "layer.gif";
-     };
-     map.addTileLayer(tilelayer);*/
 
-    //点击移动
-    /*window.setTimeout(function(){
-     map.panTo(new BMap.Point(116.409, 39.918));
-     }, 2000);*/
+    //test 途径地点
+    /*var map = new BMap.Map("container");
+     map.centerAndZoom(new BMap.Point(116.404, 39.915), 11);
+     map.enableScrollWheelZoom(true);
+
+     var p1 = new BMap.Point(116.301934,39.977552);
+     var p2 = new BMap.Point(116.508328,39.919141);
+
+     var shockPoint = new BMap.Point(116.404, 39.915);
+
+     var lushuOpts = {
+     defaultContent: "一方有难，八方支援",
+     // autoView: false,//是否开启自动视野调整，如果开启那么路书在运动过程中会根据视野自动调整,会出现抖动
+     icon: new BMap.Icon('../static/img/car.png', new BMap.Size(52, 26), {anchor: new BMap.Size(27, 13)}),
+     speed: 5500,
+     enableRotation: true,//是否设置marker随着道路的走向进行旋转
+     landmarkPois: [
+     // {lng:116.3814,lat:39.9740,html:'肯德基早餐<div></div>',pauseTime:2}
+     ]
+     };
+     lushuOpts.landmarkPois.push(shockPoint);
+
+
+     var driving = new BMap.DrivingRoute(map, {            onSearchComplete: function (res) {
+     if (driving.getStatus() == BMAP_STATUS_SUCCESS) {
+     var plans = res.getPlan(0);
+
+     var arrPois = plans.getRoute(0).getPath();
+     console.log(plans);
+     map.addOverlay(new BMap.Polyline(arrPois, {strokeColor: '#111'}));
+     map.setViewport(arrPois);
+
+     var lushu = new BMapLib.LuShu(map, arrPois, lushuOpts);
+     window.lushus.push(lushu);
+     }
+
+     },
+     renderOptions:{map: map, autoViewport: true}});
+     driving.search(p1, p2);//waypoints表示途经点*/
+
+
 
 </script>
 </body>

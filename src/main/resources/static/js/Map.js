@@ -42,6 +42,12 @@ var Map = function (container) {
         map.addOverlay(myRichMarker1);
     };
 
+    map.addOverlays = function (overlays) {
+        for (i = 0; i < overlays.length; i++) {
+            map.addOverlay(overlays[i])
+        }
+    };
+
 
     return map;
 };

@@ -194,6 +194,17 @@ var BMapLib = window.BMapLib = BMapLib || {};
             this._path = path;
             //移动到当前点的索引
             this.i = 0;
+            //总索引数
+            this.total = path.length;
+
+            this.totalDuration = opts.totalDuration;
+            this.totalDistance = opts.totalDistance;
+
+            this.duration = this.totalDuration;
+            this.distance = this.totalDistance;
+
+            this.content = opts.defaultContent;
+
             //控制暂停后开始移动的队列的数组
             this._setTimeoutQuene = [];
             //进行坐标转换的类
@@ -227,6 +238,25 @@ var BMapLib = window.BMapLib = BMapLib || {};
             }
         }
     };
+
+
+    /**
+     * 根据用户输入的opts，修改默认参数_opts
+     * @param {Json Object} opts 用户输入的修改参数.
+     * @return 无返回值.
+     */
+    LuShu.prototype.parseContent = function (index) {
+        var me = this;
+        //行走比例
+        var p = (index / me.total).toFixed(2);
+        me.duration = ((me.totalDuration * (1 - p)) / 60).toFixed(2);
+        me.distance = ((me.totalDistance * (1 - p)) / 1000).toFixed(0);
+        var content = `剩余${me.duration}分钟,${me.distance}公里`;
+        return content;
+    };
+
+
+
 
     /**
      * @description 开始运动
@@ -339,10 +369,12 @@ var BMapLib = window.BMapLib = BMapLib || {};
          * 添加上方overlay
          * @return 无返回值.
          */
-        _addInfoWin: function () {
+        _addInfoWin: function (content) {
+
+
             var me = this;
             //if(me._opts.defaultContent!== ""){
-            var overlay = new CustomOverlay(me._marker.getPosition(), me._opts.defaultContent);
+            var overlay = new CustomOverlay(me._marker.getPosition(), content || me._opts.defaultContent);
 
             //将当前类的引用传给overlay。
             overlay.setRelatedClass(this);
@@ -491,7 +523,10 @@ var BMapLib = window.BMapLib = BMapLib || {};
         _moveNext: function (index) {
             var me = this;
             if (index < this._path.length - 1) {
+                me.content = me.parseContent(index);
                 me._move(me._path[index], me._path[index + 1], me._tween.linear);
+            } else {
+                me._overlay.setHtml(me._opts.endContent);
             }
         },
         /**
@@ -513,7 +548,7 @@ var BMapLib = window.BMapLib = BMapLib || {};
                 me._overlay.setPosition(pos, me._marker.getIcon().size);
                 me._pauseForView(index);
             } else {
-                me._overlay.setHtml(me._opts.defaultContent);
+                me._overlay.setHtml(me.content);
             }
         },
         /**
