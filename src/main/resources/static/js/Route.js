@@ -12,49 +12,66 @@ var Route = function (map, endPoint) {
         defaultContent: "一方有难，八方支援",
         // autoView: false,//是否开启自动视野调整，如果开启那么路书在运动过程中会根据视野自动调整,会出现抖动
         icon: new BMap.Icon('../static/img/car.png', new BMap.Size(52, 26), {anchor: new BMap.Size(27, 13)}),
-        speed: 100,
+        speed: 5000,
         enableRotation: true,//是否设置marker随着道路的走向进行旋转
-        landmarkPois: [
-            // {lng:116.3814,lat:39.9740,html:'肯德基早餐<div></div>',pauseTime:2}
-        ]
+        landmarkPois: [],
+        totalDuration: 2000,
+        totalDistance: 10000,
+        endContent: "到达灾区",
     };
 
     var waypoints = {
         'waypoints': [],
     };
 
-    var shockPoint = new BMap.Point(116.404, 39.915);
-    route.addLandPois = function (point, title, pauseTime) {
+    route.addLandPoi = function (point, title, pauseTime) {
         var poi = {
             'lng': point.lng,
             'lat': point.lat,
-            'html': "早餐",
-            'pauseTime': pauseTime,
+            'html': title || "休息中",
+            'pauseTime': pauseTime || 2,
         };
         lushuOpts.landmarkPois.push(poi);
-        // waypoints.waypoints.push(point);
+        waypoints.waypoints.push(point);
+        return this;
+    };
+
+    route.getAllArrPois = function (plan, waypoints) {
+        var routes = plan.dk;
+        var allArrPois = [];
+        for (var i = 0; i < routes.length; i++) {
+            var pois = plan.getRoute(i).getPath();
+            if (waypoints && waypoints[i]) {
+                console.log(`waypoints[${i}]`, waypoints[i]);
+                pois[pois.length - 1].lng = waypoints[i].lng;
+                pois[pois.length - 1].lat = waypoints[i].lat;
+            }
+            allArrPois = allArrPois.concat(pois);
+        }
+        return allArrPois;
     };
 
 
     route.setStart = function (point) {
-        var drv = new BMap.DrivingRoute(map, {
+        var self = this;
+        var driving = new BMap.DrivingRoute(map, {
             onSearchComplete: function (res) {
-                if (drv.getStatus() == BMAP_STATUS_SUCCESS) {
-                    var arrPois = res.getPlan(0).getRoute(0).getPath();
+                if (driving.getStatus() == BMAP_STATUS_SUCCESS) {
+                    //途径一个点的话，有两个route
+                    var plan = res.getPlan(0);
 
-                    console.info(arrPois);
+                    var arrPois = self.getAllArrPois(plan, waypoints.waypoints);
+
                     map.addOverlay(new BMap.Polyline(arrPois, {strokeColor: '#111'}));
-                    // map.setViewport(arrPois);
 
                     var lushu = new BMapLib.LuShu(map, arrPois, lushuOpts);
                     window.lushus.push(lushu);
                 }
 
-            }
+            },
         });
-        drv.disableAutoViewport();
-        drv.search(point, end, waypoints);
-        return drv;
+        driving.search(point, end, waypoints);//waypoints表示途经点
+        return driving;
     };
 
     route.setStarts = function (points) {
