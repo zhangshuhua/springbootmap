@@ -35,6 +35,10 @@ function getNewPoints(max, center) {
     return newPoints;
 }
 
-function $(element) {
+function e(element) {
     return document.querySelector(element)
+}
+
+function showInfo(e) {
+    alert(e.point.lng + ", " + e.point.lat);
 }

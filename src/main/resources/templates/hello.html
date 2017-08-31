@@ -43,21 +43,39 @@
     var shockPoint = new BMap.Point(116.404, 39.915);
 
     //测试
-    var point1 = new BMap.Point(116.412624, 39.890646);
-    var point2 = new BMap.Point(116.443094, 39.935362);
-    var point3 = new BMap.Point(116.419931, 39.934604);
-    var point4 = new BMap.Point(116.419433, 39.91715);
-    var marker1 = new BMap.Marker(point1);
-    var marker2 = new BMap.Marker(point2);
+    //    var point1 = new BMap.Point(116.412624, 39.890646);
+    //    var point2 = new BMap.Point(116.443094, 39.935362);
+    //    var point3 = new BMap.Point(116.419931, 39.934604);
+    //    var point4 = new BMap.Point(116.419433, 39.91715);
+    //    var point5 = new BMap.Point(116.411433, 39.95715);
+    //    var marker1 = new BMap.Marker(point1);
+    //    var marker2 = new BMap.Marker(point2);
 
-    map.centerAndZoom(shockPoint, 15);
+    map.centerAndZoom(shockPoint, 13);
     map.enableScrollWheelZoom();
 
     keydownEvent(map);
 
-    var route = new Route(map, shockPoint);
-    route.addLandPoi(point2).addLandPoi(point3).addLandPoi(point4);
-    route.setStart(point1);
+    var max = 8;
+    var points = getNewPoints(max, shockPoint);
+    var makers = getNewMarkers(points);
+    for (var m of makers) {
+        showInfoWindow(m);
+    }
+    map.addOverlays(makers);
+
+    for (var p of points) {
+        var r = new Route(map, shockPoint);
+        r.setStart(p);
+    }
+
+    //    var route = new Route(map, shockPoint);
+    ////    route.addLandPoi(point2).addLandPoi(point3).addLandPoi(point4);
+    //    route.setStart(point1);
+    //
+    //    var route1 = new Route(map, shockPoint);
+    ////    route1.addLandPoi(point5);
+    //    route1.setStart(point4);
 
     /*
      //自动增加poi点
@@ -83,16 +101,16 @@
     };
     //
     //标注移动
-    map.addRichMark(shockPoint);
+    map.addRichMark(shockPoint, "../static/img/markBg.png");
 
-    function showInfo(e) {
+    /*function showInfo(e) {
      alert(e.point.lng + ", " + e.point.lat);
      }
     map.addEventListener("click", showInfo);
 
     map.addEventListener("zoomend", function () {
         console.log("地图缩放至：" + this.getZoom() + "级");
-    });
+     });*/
 
 
 </script>

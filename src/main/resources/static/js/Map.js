@@ -28,11 +28,12 @@ var Map = function (container) {
     };
 
     map.addRandomMarkes = function (max, center) {
-        let markers = getNewMarkers(max);
+        let markers = getNewMarkers(max, center);
+        this.addOverlays(markers);
     };
 
     map.addRichMark = function (point, img) {
-        var htm1 = "<div id='overLay' style='width:50px;height:75px;background:url(../static/img/markBg.png) left top no-repeat; position: absolute;'>"
+        var htm1 = `<div id='overLay' style='width:50px;height:75px;background:url(${img}) left top no-repeat; position: absolute;'>`
                 + "<img style='margin-left:2px;margin-top: 2px;width: 41px;height: 41px' src='../static/img/small.jpg' />"
                 + "</div>",
             myRichMarker1 = new BMapLib.RichMarker(htm1, point, {

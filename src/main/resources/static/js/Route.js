@@ -12,7 +12,7 @@ var Route = function (map, endPoint) {
         defaultContent: "一方有难，八方支援",
         // autoView: false,//是否开启自动视野调整，如果开启那么路书在运动过程中会根据视野自动调整,会出现抖动
         icon: new BMap.Icon('../static/img/car.png', new BMap.Size(52, 26), {anchor: new BMap.Size(27, 13)}),
-        speed: 5000,
+        speed: 100,
         enableRotation: true,//是否设置marker随着道路的走向进行旋转
         landmarkPois: [],
         totalDuration: 2000,
@@ -59,6 +59,11 @@ var Route = function (map, endPoint) {
                 if (driving.getStatus() == BMAP_STATUS_SUCCESS) {
                     //途径一个点的话，有两个route
                     var plan = res.getPlan(0);
+                    //求出距离和时间
+                    var duration = plan.getDuration(false);
+                    var distance = plan.getDistance(false);
+                    lushuOpts.totalDuration = duration;
+                    lushuOpts.totalDistance = distance;
 
                     var arrPois = self.getAllArrPois(plan, waypoints.waypoints);
 
@@ -74,7 +79,7 @@ var Route = function (map, endPoint) {
         return driving;
     };
 
-    route.setStarts = function (points) {
+    /*    route.setStarts = function (points) {
         for (let i = 0; i < points.length; i++) {
             let p = points[i];
             let drv = new BMap.DrivingRoute(map, {
@@ -98,8 +103,6 @@ var Route = function (map, endPoint) {
             drv.search(p, end);
             drv.disableAutoViewport()
         }
-    };
-
-
+     }*/
     return route;
 };
